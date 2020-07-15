@@ -21,10 +21,6 @@ public class StrategyService {
     private final ForkJoinEventHandler forkJoinEventHandler;
     private final DedicatedClockEventHandler dedicatedClockEventHandler;
 
-    private final SplittableRandom splittableRandom = new SplittableRandom();
-
-    private Strategy currentStrategy = Strategy.BASIC;
-
     public StrategyService(@Autowired BasicEventHandler basicEventHandler,
                            @Autowired ForkJoinEventHandler forkJoinEventHandler,
                            @Autowired DedicatedClockEventHandler dedicatedClockEventHandler) {
@@ -33,31 +29,16 @@ public class StrategyService {
         this.dedicatedClockEventHandler = dedicatedClockEventHandler;
     }
 
-    public Strategy getCurrent() {
-        return currentStrategy;
-    }
-
-    public Strategy update(String value) {
-        Strategy result = Strategy.find(value);
-        if (result != null) {
-            this.currentStrategy = result;
+    public Strategy retrieveByKey(String key) {
+        Strategy result = Strategy.find(key);
+        if (result == null) {
+            throw new IllegalArgumentException("Strategy not found!");
         }
-        log.debug(String.format("Changing strategies: %s is %s", value, result));
-        return this.currentStrategy;
+        return result;
     }
 
-    public EventConfig createRandomEventConfig(String experimentName) {
-        Short configMaxEvents = (short) splittableRandom.nextInt(1, 8);
-        Integer configMaxTime = splittableRandom.nextInt(1, 50) * 100; // 100ms to 5000 ms
-        Short configPageReads = (short) splittableRandom.nextInt(1, 10);
-        Short configPageSize = (short) splittableRandom.nextInt(20, 40);
-        Short configLoopSkips  = (short) splittableRandom.nextInt(1, 4);
-        return new EventConfig(0L, currentStrategy.getKey(), experimentName, configMaxEvents, configMaxTime,
-                configPageReads, configPageSize, configLoopSkips, (short) 0, 0L);
-    }
-
-    public AbstractEventHandler createEventHandlerByCurrentStrategy() {
-        switch(currentStrategy) {
+    public AbstractEventHandler createEventHandlerByStrategy(Strategy strategy) {
+        switch(strategy) {
             case BASIC:
                 return basicEventHandler;
             case FORK_JOIN:
