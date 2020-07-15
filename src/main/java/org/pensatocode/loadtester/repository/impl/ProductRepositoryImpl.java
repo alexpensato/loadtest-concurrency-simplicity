@@ -47,7 +47,7 @@ public class ProductRepositoryImpl extends AbstractJdbcRepository<Product, Long>
     @Override
     public Integer deleteProducts(@Param("id") Long id) {
         Integer lineCount = jdbcTemplate.update(
-                "DELETE FROM product WHERE id > ?",
+                "DELETE FROM product WHERE id >= ?",
                 new Object[]{id},
                 new int[]{Types.BIGINT}
         );

@@ -36,7 +36,7 @@ public class EventConfigRepositoryImpl extends AbstractJdbcRepository<EventConfi
     @Override
     public Integer deleteEventConfigs(@Param("id") Long id) {
         Integer lineCount = jdbcTemplate.update(
-                "DELETE FROM event_config WHERE id > ?",
+                "DELETE FROM event_config WHERE id >= ?",
                 new Object[]{id},
                 new int[]{Types.BIGINT}
         );
