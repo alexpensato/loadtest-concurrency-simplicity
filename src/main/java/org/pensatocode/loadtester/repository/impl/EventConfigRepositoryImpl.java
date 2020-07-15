@@ -6,6 +6,7 @@ import org.pensatocode.loadtester.repository.EventConfigRepository;
 
 import org.pensatocode.simplicity.jdbc.AbstractJdbcRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -19,18 +20,19 @@ public class EventConfigRepositoryImpl extends AbstractJdbcRepository<EventConfi
     }
 
     @Override
-    public Integer deleteWithOffset(Integer offset) {
-        EventConfig eventConfig = jdbcTemplate.queryForObject(
+    public EventConfig findByOffset(Integer offset) {
+        return jdbcTemplate.queryForObject(
                 "SELECT * FROM event_config ORDER BY id LIMIT 1 OFFSET ?",
                 new Object[]{offset},
                 new int[]{Types.INTEGER},
                 rowMapper);
-        if (eventConfig == null) {
-            return 0;
-        }
+    }
+
+    @Override
+    public Integer deleteEventConfigs(@Param("id") Long id) {
         Integer lineCount = jdbcTemplate.update(
                 "DELETE FROM event_config WHERE id > ?",
-                new Object[]{eventConfig.getId()},
+                new Object[]{id},
                 new int[]{Types.BIGINT}
         );
         decreaseCounter(lineCount);

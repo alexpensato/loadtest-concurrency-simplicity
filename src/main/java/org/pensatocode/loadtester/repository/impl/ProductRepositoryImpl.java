@@ -6,9 +6,8 @@ import org.pensatocode.loadtester.repository.ProductRepository;
 
 import org.pensatocode.simplicity.jdbc.AbstractJdbcRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -23,30 +22,29 @@ public class ProductRepositoryImpl extends AbstractJdbcRepository<Product, Long>
     }
 
     @Override
-    public List<Product> findAllByDescriptionPattern(String searchPattern) {
-        Pageable pageable = PageRequest.of(0, 20, Sort.unsorted());
+    public List<Product> findByDescriptionLike(String description, Pageable pageable) {
         String queryString = sqlGenerator.selectAll(tableDesc, "description like ?", pageable);
         return jdbcTemplate.query(
                 queryString,
-                new String[]{"%" + searchPattern + "%"},
+                new String[]{"%" + description + "%"},
                 new int[]{Types.VARCHAR},
                 rowMapper);
     }
 
     @Override
-    public Integer deleteWithOffset(Integer offset) {
-//        SELECT * FROM event_config ORDER BY id LIMIT 1 OFFSET ?;
-        Product product = jdbcTemplate.queryForObject(
+    public Product findByOffset(Integer offset) {
+        return jdbcTemplate.queryForObject(
                 "SELECT * FROM product ORDER BY id LIMIT 1 OFFSET ?",
                 new Object[]{offset},
                 new int[]{Types.INTEGER},
                 rowMapper);
-        if (product == null) {
-            return 0;
-        }
+    }
+
+    @Override
+    public Integer deleteProducts(@Param("id") Long id) {
         Integer lineCount = jdbcTemplate.update(
                 "DELETE FROM product WHERE id > ?",
-                new Object[]{product.getId()},
+                new Object[]{id},
                 new int[]{Types.BIGINT}
         );
         decreaseCounter(lineCount);
