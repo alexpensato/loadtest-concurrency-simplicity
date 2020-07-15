@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <category id='1' name='abc' />
+    <company id='1' title='abc' />
+    <product id='1' description='abc' search_pattern='abc' price='1.0' category_rank='1' category_id='1' company_id='1' original='true' />
+    <event_config id='1' strategy='abc' experiment_name='abc' config_max_events='1' config_max_time='1' config_page_reads='1' config_page_size='1' config_loop_skips='1' executed_events='1' executed_time='1' />
+</dataset>
