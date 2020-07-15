@@ -24,13 +24,14 @@ public abstract class AbstractEventHandler implements EventHandler {
     protected Short doSomeWork(EventConfig eventConfig, short loopCounter) {
         short count = 0;
         Product product = ProductUtil.createRandomProduct();
-        List<Product> products  = productRepository.findAllByDescriptionPattern(product.getSearchPattern());
+        Pageable pageable = PageRequest.of(0, 20, Sort.unsorted());
+        List<Product> products  = productRepository.findByDescriptionLike(product.getSearchPattern(), pageable);
         if (products == null || products.isEmpty()) {
             Long totalProducts = productRepository.count();
             long offset = totalProducts / eventConfig.getConfigPageReads();
             int size = eventConfig.getConfigPageSize();
             int page = (int) (offset / size);
-            Pageable pageable = PageRequest.of(page, size, Sort.unsorted());
+            pageable = PageRequest.of(page, size, Sort.unsorted());
             Page<Product> pagedProducts = productRepository.findAll(pageable);
             if (pagedProducts == null || pagedProducts.isEmpty()) {
                 log.warn(String.format("Products list is empty with searchQuery '%s' and page %s",
