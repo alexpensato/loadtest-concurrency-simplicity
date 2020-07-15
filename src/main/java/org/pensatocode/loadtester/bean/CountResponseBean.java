@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CountersBean {
+public class CountResponseBean {
     private CounterBean counts;
     private CounterBean atomicCounters;
 }
