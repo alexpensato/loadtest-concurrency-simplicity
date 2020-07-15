@@ -33,11 +33,15 @@ public class ProductRepositoryImpl extends AbstractJdbcRepository<Product, Long>
 
     @Override
     public Product findByOffset(Integer offset) {
-        return jdbcTemplate.queryForObject(
+        List<Product> list = jdbcTemplate.query(
                 "SELECT * FROM product ORDER BY id LIMIT 1 OFFSET ?",
                 new Object[]{offset},
                 new int[]{Types.INTEGER},
                 rowMapper);
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
     }
 
     @Override

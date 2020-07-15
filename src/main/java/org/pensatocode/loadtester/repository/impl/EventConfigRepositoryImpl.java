@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Types;
+import java.util.List;
 
 @Repository(value = "eventConfigRepository")
 public class EventConfigRepositoryImpl extends AbstractJdbcRepository<EventConfig, Long> implements EventConfigRepository {
@@ -21,11 +22,15 @@ public class EventConfigRepositoryImpl extends AbstractJdbcRepository<EventConfi
 
     @Override
     public EventConfig findByOffset(Integer offset) {
-        return jdbcTemplate.queryForObject(
+        List<EventConfig> list = jdbcTemplate.query(
                 "SELECT * FROM event_config ORDER BY id LIMIT 1 OFFSET ?",
                 new Object[]{offset},
                 new int[]{Types.INTEGER},
                 rowMapper);
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
     }
 
     @Override
