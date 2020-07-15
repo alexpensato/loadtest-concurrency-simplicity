@@ -1,8 +1,11 @@
 package org.pensatocode.loadtester.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.pensatocode.loadtester.bean.CountResponseBean;
+import org.pensatocode.loadtester.bean.CounterBean;
 import org.pensatocode.loadtester.handler.EventHandler;
 import org.pensatocode.loadtester.model.Strategy;
+import org.pensatocode.loadtester.services.GeneratorService;
 import org.pensatocode.loadtester.services.LoadTestService;
 import org.pensatocode.loadtester.services.StrategyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +28,17 @@ public class LoadTestRestController {
 
     private final StrategyService strategyService;
     private final LoadTestService loadTestService;
+    private final GeneratorService generatorService;
 
     private final int PRODUCTS_OFFSET;
     private final int EVENTS_OFFSET;
 
     public LoadTestRestController(@Autowired StrategyService strategyService,
-                                  @Autowired LoadTestService loadTestService) {
+                                  @Autowired LoadTestService loadTestService,
+                                  @Autowired GeneratorService generatorService) {
         this.strategyService = strategyService;
         this.loadTestService = loadTestService;
+        this.generatorService = generatorService;
         Properties properties = loadApplicationProperties();
         PRODUCTS_OFFSET = Optional.ofNullable(properties.getProperty("pensatocode.loadtest.offset.product"))
                 .map(Integer::parseInt)
@@ -46,8 +52,8 @@ public class LoadTestRestController {
      * Endpoint to generate necessary amount of data to initiate load test
      */
     @GetMapping("/data/generate")
-    public String generate() {
-        return loadTestService.generateTestData(PRODUCTS_OFFSET, EVENTS_OFFSET);
+    public CounterBean generate() {
+        return generatorService.generateData();
     }
 
     /**
@@ -56,6 +62,17 @@ public class LoadTestRestController {
     @GetMapping("/data/reset")
     public String reset() {
         return loadTestService.resetTestData(PRODUCTS_OFFSET, EVENTS_OFFSET);
+    }
+
+    /**
+     * Endpoint to compare simplicity and database counters
+     */
+    @GetMapping("/data/count")
+    public CountResponseBean countAllRepositories() {
+        return new CountResponseBean(
+                this.generatorService.countAllRepositories(),
+                this.generatorService.getAllAtomicCounters()
+        );
     }
 
     /**
